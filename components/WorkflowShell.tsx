@@ -9,6 +9,24 @@ import { toFeatureSlug, type ClarifyingQuestion } from '@/lib/chat-flow';
 
 type WorkflowStage = 'initial' | 'clarifying' | 'drafted' | 'approved';
 
+type CommitReview = {
+  repository: string;
+  branch: string;
+  files: {
+    prd: string;
+    tasks: string;
+  };
+  collisionDetected: boolean;
+  versioningApplied: boolean;
+};
+
+type CommitResult = {
+  repository: string;
+  branch: string;
+  commitSha: string;
+  files: string[];
+};
+
 export function WorkflowShell() {
   const [activeTab, setActiveTab] = useState<'prd' | 'tasks'>('prd');
   const [stage, setStage] = useState<WorkflowStage>('initial');
@@ -20,6 +38,8 @@ export function WorkflowShell() {
   const [approvedPrd, setApprovedPrd] = useState<string | null>(null);
   const [editingPrd, setEditingPrd] = useState(false);
   const [editingTasks, setEditingTasks] = useState(false);
+  const [review, setReview] = useState<CommitReview | null>(null);
+  const [commitResult, setCommitResult] = useState<CommitResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -39,6 +59,8 @@ export function WorkflowShell() {
   const askClarifyingQuestions = async () => {
     setLoading(true);
     setError(null);
+    setReview(null);
+    setCommitResult(null);
 
     const response = await fetch('/api/llm/clarify', {
       method: 'POST',
@@ -66,6 +88,8 @@ export function WorkflowShell() {
   const generatePrd = async () => {
     setLoading(true);
     setError(null);
+    setReview(null);
+    setCommitResult(null);
 
     const response = await fetch('/api/llm/prd', {
       method: 'POST',
@@ -97,6 +121,8 @@ export function WorkflowShell() {
 
     setLoading(true);
     setError(null);
+    setReview(null);
+    setCommitResult(null);
 
     const response = await fetch('/api/session/approval', {
       method: 'POST',
@@ -130,6 +156,8 @@ export function WorkflowShell() {
 
     setLoading(true);
     setError(null);
+    setReview(null);
+    setCommitResult(null);
 
     const response = await fetch('/api/llm/tasks', {
       method: 'POST',
@@ -156,6 +184,81 @@ export function WorkflowShell() {
 
   const regenerateTasks = async () => {
     await generateTasks();
+  };
+
+  const loadReviewSummary = async () => {
+    if (!approvedPrd || !tasksDraft.trim()) {
+      setError('Generate tasks before reviewing commit summary.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const response = await fetch('/api/github/commit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        featurePrompt,
+        approvedPrd,
+        tasksMarkdown: tasksDraft,
+        dryRun: true,
+      }),
+    });
+
+    const payload = (await response.json()) as { review?: CommitReview; error?: string };
+
+    if (!response.ok || !payload.review) {
+      setError(payload.error ?? 'Failed to load commit review summary');
+      setLoading(false);
+      return;
+    }
+
+    setReview(payload.review);
+    setCommitResult(null);
+    setLoading(false);
+  };
+
+  const commitToRepo = async () => {
+    if (!approvedPrd || !tasksDraft.trim()) {
+      setError('Generate tasks before committing to the repository.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const response = await fetch('/api/github/commit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        featurePrompt,
+        approvedPrd,
+        tasksMarkdown: tasksDraft,
+      }),
+    });
+
+    const payload = (await response.json()) as {
+      repository?: string;
+      branch?: string;
+      commitSha?: string;
+      files?: string[];
+      error?: string;
+    };
+
+    if (!response.ok || !payload.commitSha || !payload.repository || !payload.branch || !payload.files) {
+      setError(payload.error ?? 'Failed to commit PRD and tasks');
+      setLoading(false);
+      return;
+    }
+
+    setCommitResult({
+      repository: payload.repository,
+      branch: payload.branch,
+      commitSha: payload.commitSha,
+      files: payload.files,
+    });
+    setLoading(false);
   };
 
   return (
@@ -187,15 +290,19 @@ export function WorkflowShell() {
       />
       <ActionBar
         canGeneratePrd={canGeneratePrd}
+        commitResult={commitResult}
         error={error}
         isApproved={stage === 'approved'}
         loading={loading}
         onApprovePrd={approvePrd}
+        onCommitToRepo={commitToRepo}
         onGeneratePrd={generatePrd}
         onGenerateTasks={generateTasks}
+        onLoadReviewSummary={loadReviewSummary}
         onRegeneratePrd={regeneratePrd}
         onRegenerateTasks={regenerateTasks}
         prdDraft={prdDraft}
+        review={review}
         tasksDraft={tasksDraft}
       />
     </>

@@ -9,6 +9,10 @@ export type ClarifyingQuestion = {
   options: ClarifyingOption[];
 };
 
+import { toFeatureSlug } from '@/lib/slug';
+
+export { toFeatureSlug };
+
 export type AnswerSelection = {
   question: number;
   option: string;
@@ -121,19 +125,6 @@ export function buildPrdMarkdown(params: {
   });
 
   return `# Product Requirements Document\n\n## 1. Feature Overview\n${params.featurePrompt}\n\n## 2. Clarifying Decisions\n${summaryBullets.join('\n')}\n\n## 3. Goals\n- Deliver a clear v1 scope for implementation.\n- Reduce ambiguity before task generation.\n\n## 4. Functional Requirements\n- The system must support the approved user flow and constraints captured above.\n- The system must provide observability and actionable error states for the feature.\n\n## 5. Non-Goals\n- Any behavior not explicitly listed in this PRD draft is out of scope for v1.\n\n## 6. Success Metrics\n- PRD is approved with no unresolved clarifying questions.\n- Engineering can generate actionable implementation tasks from this document.\n`;
-}
-
-export function toFeatureSlug(input: string): string {
-  const slug = input
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, ' ')
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .slice(0, 64)
-    .replace(/^-+|-+$/g, '');
-
-  return slug || 'feature';
 }
 
 export function buildTasksMarkdown(params: { featurePrompt: string; approvedPrd: string }): string {
