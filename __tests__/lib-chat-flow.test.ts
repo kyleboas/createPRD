@@ -1,4 +1,4 @@
-import { parseAnswerString } from '@/lib/chat-flow';
+import { buildTasksMarkdown, parseAnswerString, toFeatureSlug, validateTasksMarkdown } from '@/lib/chat-flow';
 
 describe('parseAnswerString', () => {
   it('parses comma-delimited answers in 1B format', () => {
@@ -11,5 +11,22 @@ describe('parseAnswerString', () => {
 
   it('throws on invalid format', () => {
     expect(() => parseAnswerString('1-B,2-C', 2)).toThrow('Invalid answer format');
+  });
+});
+
+describe('tasks markdown generation', () => {
+  it('creates safe feature slugs', () => {
+    expect(toFeatureSlug(' Build Fancy Search / Filters!!! ')).toBe('build-fancy-search-filters');
+  });
+
+  it('generates valid tasks markdown with checkbox and numbering rules', () => {
+    const markdown = buildTasksMarkdown({
+      featurePrompt: 'Build Fancy Search',
+      approvedPrd: '# Product Requirements Document\n\n## 1. Feature Overview\nSearch improvements',
+    });
+
+    expect(markdown).toContain('- [ ] 1.0');
+    expect(markdown).toContain('- [ ] 1.1');
+    expect(validateTasksMarkdown(markdown)).toEqual({ valid: true });
   });
 });

@@ -5,18 +5,21 @@ import { useMemo, useState } from 'react';
 import { ActionBar } from '@/components/ActionBar';
 import { ChatPanel } from '@/components/ChatPanel';
 import { PreviewTabs } from '@/components/PreviewTabs';
-import type { ClarifyingQuestion } from '@/lib/chat-flow';
+import { toFeatureSlug, type ClarifyingQuestion } from '@/lib/chat-flow';
 
 type WorkflowStage = 'initial' | 'clarifying' | 'drafted' | 'approved';
 
 export function WorkflowShell() {
+  const [activeTab, setActiveTab] = useState<'prd' | 'tasks'>('prd');
   const [stage, setStage] = useState<WorkflowStage>('initial');
   const [featurePrompt, setFeaturePrompt] = useState('');
   const [questions, setQuestions] = useState<ClarifyingQuestion[]>([]);
   const [answerString, setAnswerString] = useState('');
   const [prdDraft, setPrdDraft] = useState('');
+  const [tasksDraft, setTasksDraft] = useState('');
   const [approvedPrd, setApprovedPrd] = useState<string | null>(null);
-  const [editing, setEditing] = useState(false);
+  const [editingPrd, setEditingPrd] = useState(false);
+  const [editingTasks, setEditingTasks] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -24,6 +27,14 @@ export function WorkflowShell() {
     () => questions.length > 0 && answerString.trim().length > 0,
     [answerString, questions.length],
   );
+
+  const computedFilenames = useMemo(() => {
+    const slug = toFeatureSlug(featurePrompt);
+    return {
+      prd: `/tasks/prd-${slug}.md`,
+      tasks: `/tasks/tasks-${slug}.md`,
+    };
+  }, [featurePrompt]);
 
   const askClarifyingQuestions = async () => {
     setLoading(true);
@@ -47,6 +58,8 @@ export function WorkflowShell() {
     setStage('clarifying');
     setAnswerString('');
     setApprovedPrd(null);
+    setTasksDraft('');
+    setActiveTab('prd');
     setLoading(false);
   };
 
@@ -71,6 +84,8 @@ export function WorkflowShell() {
     setPrdDraft(payload.markdown);
     setStage('drafted');
     setApprovedPrd(null);
+    setTasksDraft('');
+    setActiveTab('prd');
     setLoading(false);
   };
 
@@ -99,7 +114,7 @@ export function WorkflowShell() {
 
     setApprovedPrd(payload.approvedPrdSnapshot);
     setStage('approved');
-    setEditing(false);
+    setEditingPrd(false);
     setLoading(false);
   };
 
@@ -107,14 +122,57 @@ export function WorkflowShell() {
     await generatePrd();
   };
 
+  const generateTasks = async () => {
+    if (!approvedPrd) {
+      setError('Approve the PRD before generating tasks.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const response = await fetch('/api/llm/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ approvedPrd, prompt: featurePrompt }),
+    });
+
+    const payload = (await response.json()) as {
+      markdown?: string;
+      error?: string;
+    };
+
+    if (!response.ok || !payload.markdown) {
+      setError(payload.error ?? 'Failed to generate tasks');
+      setLoading(false);
+      return;
+    }
+
+    setTasksDraft(payload.markdown);
+    setEditingTasks(false);
+    setActiveTab('tasks');
+    setLoading(false);
+  };
+
+  const regenerateTasks = async () => {
+    await generateTasks();
+  };
+
   return (
     <>
       <PreviewTabs
+        activeTab={activeTab}
         approvedPrd={approvedPrd}
-        editing={editing}
-        onEditToggle={() => setEditing((value) => !value)}
+        editingPrd={editingPrd}
+        editingTasks={editingTasks}
+        filenames={computedFilenames}
+        onPrdEditToggle={() => setEditingPrd((value) => !value)}
+        onTabChange={setActiveTab}
+        onTasksDraftChange={setTasksDraft}
+        onTasksEditToggle={() => setEditingTasks((value) => !value)}
         onPrdDraftChange={setPrdDraft}
         prdDraft={prdDraft}
+        tasksDraft={tasksDraft}
       />
       <ChatPanel
         answerString={answerString}
@@ -134,8 +192,11 @@ export function WorkflowShell() {
         loading={loading}
         onApprovePrd={approvePrd}
         onGeneratePrd={generatePrd}
+        onGenerateTasks={generateTasks}
         onRegeneratePrd={regeneratePrd}
+        onRegenerateTasks={regenerateTasks}
         prdDraft={prdDraft}
+        tasksDraft={tasksDraft}
       />
     </>
   );
