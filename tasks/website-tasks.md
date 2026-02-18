@@ -107,10 +107,12 @@ Update the file after completing each sub-task, not just after completing an ent
 
 - [ ] 6.0 Implement BYOK LLM key entry, validation, and secure handling
   - [ ] 6.1 Add UI for entering an LLM key (modal/settings panel) with provider selection (at least one provider in v1)
-  - [ ] 6.2 Decide and implement key handling strategy for v1:
-    - session-only (key stored in memory for session), or
-    - client-only (stored locally), or
-    - encrypted server-side storage (DB required)
+  - [ ] 6.2 Implement key handling strategy for v1 (decided):
+    - **Default:** store key in `sessionStorage` (cleared on tab close, never persisted automatically)
+    - **Opt-in "Remember my key":** encrypt with AES-256 via Web Crypto API (`crypto.subtle`), key derived via PBKDF2 from a user-supplied passphrase, store ciphertext in `localStorage`
+    - Show a visible warning when opt-in persistence is enabled: *"Stored locally — not protected against XSS"*
+    - Add a "Forget my key" button that clears `localStorage` immediately
+    - Never send the raw key to the server except as an `Authorization` header for proxied LLM calls
   - [ ] 6.3 Implement “Validate key” action using a lightweight test request and show clear errors
   - [ ] 6.4 Ensure the raw key is never printed in logs and never returned to the client once stored
   - [ ] 6.5 Update all LLM routes (`clarify`, `prd`, `tasks`) to require a valid BYOK key (or show a friendly prompt to add one)
