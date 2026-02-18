@@ -6,6 +6,7 @@ import { getFileIfExists, resolveTargetPath } from '@/lib/github/contents';
 import { getRepoMetadata } from '@/lib/github/repos';
 import { getSession } from '@/lib/session';
 import { toFeatureSlug } from '@/lib/slug';
+import { incrementCounter } from '@/lib/telemetry';
 
 type CommitRequestBody = {
   featurePrompt?: unknown;
@@ -18,10 +19,12 @@ export async function POST(request: NextRequest) {
   const session = getSession();
 
   if (!session) {
+    incrementCounter('githubWriteFailed');
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
 
   if (!session.selectedRepo) {
+    incrementCounter('githubWriteFailed');
     return NextResponse.json({ error: 'Select a repository before committing' }, { status: 400 });
   }
 
@@ -32,14 +35,17 @@ export async function POST(request: NextRequest) {
   const dryRun = body.dryRun === true;
 
   if (!featurePrompt) {
+    incrementCounter('githubWriteFailed');
     return NextResponse.json({ error: 'Feature prompt is required' }, { status: 400 });
   }
 
   if (!approvedPrd) {
+    incrementCounter('githubWriteFailed');
     return NextResponse.json({ error: 'Approved PRD snapshot is required' }, { status: 400 });
   }
 
   if (!tasksMarkdown) {
+    incrementCounter('githubWriteFailed');
     return NextResponse.json({ error: 'Tasks markdown is required' }, { status: 400 });
   }
 
@@ -123,6 +129,7 @@ export async function POST(request: NextRequest) {
         /protected branch|protection|update is not allowed|protected/i.test(error.message);
 
       if (branchProtectionLikely) {
+        incrementCounter('githubWriteFailed');
         return NextResponse.json(
           {
             error:
@@ -132,6 +139,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      incrementCounter('githubWriteFailed');
       return NextResponse.json(
         {
           error: error.message,
@@ -140,6 +148,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    incrementCounter('githubWriteFailed');
     return NextResponse.json({ error: 'Failed to commit PRD and tasks' }, { status: 500 });
   }
 }

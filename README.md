@@ -64,6 +64,16 @@ This app uses a **GitHub OAuth App** flow for v1.
 - Selecting a repository stores it as the **last selected repo in session** and displays it in the header.
 - The repo picker also fetches and shows the repository default branch via `/api/github/repo-meta`.
 
+
+## BYOK behavior (Task 6.0)
+
+- LLM routes now require a validated BYOK key sent as an `Authorization: Bearer ...` header.
+- Use **BYOK settings** in the UI to validate your key using a lightweight provider check.
+- Default storage is `sessionStorage` (cleared on tab close).
+- Optional **Remember my key** encrypts the key with AES-256 (Web Crypto) and a PBKDF2-derived key from your passphrase, then stores ciphertext in `localStorage`.
+- A **Forget my key** action immediately removes persisted ciphertext from `localStorage`.
+- Basic non-sensitive telemetry counters are exposed at `GET /api/telemetry`.
+
 ## Scripts
 
 - `npm run dev` - start local dev server.
