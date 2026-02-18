@@ -75,7 +75,8 @@ This solves the problem of: (1) turning an idea into a clear PRD and implementat
    7.1 The system must allow the user to provide their own LLM API key.
    7.2 The system must not log the raw API key in server logs or analytics.
    7.3 The system must validate the key (e.g., via a lightweight test request) and show a clear error if invalid.
-   7.4 The system must support at least one LLM provider in v1 (codex) and be designed so additional providers can be added later.
+   7.4 The system must support at least one LLM provider in v1 (Anthropic Claude) and be designed so additional providers can be added later.
+   7.4a The recommended model for PRD and tasks generation is **claude-sonnet-4-5** or newer. Haiku-class models produce acceptable structured output (question formatting, checkbox formatting) but generate shallower PRDs and thin sub-tasks — insufficient for the app's core value proposition. The UI should surface the model being used and warn if a Haiku-tier model is detected.
    7.5 **Key storage strategy (v1 decision):**
    - **Default (required):** Store the key in **session memory only** (React state or `sessionStorage`). The key is never written to `localStorage` unless the user opts in. The key is cleared when the tab is closed.
    - **Optional "Remember my key" (opt-in):** Allow the user to persist the key in `localStorage` encrypted with AES-256 via the browser's [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API), using a key derived from a user-supplied passphrase (PBKDF2). The UI must display a visible warning: *"Your key is encrypted and stored locally. It is not protected against XSS attacks."*
