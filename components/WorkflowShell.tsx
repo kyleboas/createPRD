@@ -1,10 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { ActionBar } from '@/components/ActionBar';
+import { BYOKKeyModal } from '@/components/BYOKKeyModal';
 import { ChatPanel } from '@/components/ChatPanel';
 import { PreviewTabs } from '@/components/PreviewTabs';
+import { forgetRememberedKey, readRememberedEnvelope, readSessionKey, rememberKey, saveSessionKey, unlockRememberedKey } from '@/lib/byok-storage';
 import { toFeatureSlug, type ClarifyingQuestion } from '@/lib/chat-flow';
 
 type WorkflowStage = 'initial' | 'clarifying' | 'drafted' | 'approved';
@@ -42,6 +44,22 @@ export function WorkflowShell() {
   const [commitResult, setCommitResult] = useState<CommitResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showByokModal, setShowByokModal] = useState(false);
+  const [llmProvider, setLlmProvider] = useState<'codex'>('codex');
+  const [llmKey, setLlmKey] = useState<string | null>(null);
+  const [byokStatus, setByokStatus] = useState('No validated key in this session.');
+  const [hasRememberedKey, setHasRememberedKey] = useState(false);
+
+  useEffect(() => {
+    const saved = readSessionKey();
+    if (saved) {
+      setLlmProvider(saved.provider);
+      setLlmKey(saved.apiKey);
+      setByokStatus('Loaded validated BYOK key from session storage.');
+    }
+
+    setHasRememberedKey(Boolean(readRememberedEnvelope()));
+  }, []);
 
   const canGeneratePrd = useMemo(
     () => questions.length > 0 && answerString.trim().length > 0,
@@ -56,61 +74,89 @@ export function WorkflowShell() {
     };
   }, [featurePrompt]);
 
-  const askClarifyingQuestions = async () => {
-    setLoading(true);
-    setError(null);
-    setReview(null);
-    setCommitResult(null);
-
-    const response = await fetch('/api/llm/clarify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: featurePrompt }),
-    });
-
-    const payload = (await response.json()) as { questions?: ClarifyingQuestion[]; error?: string };
-
-    if (!response.ok || !payload.questions) {
-      setError(payload.error ?? 'Failed to generate clarifying questions');
-      setLoading(false);
-      return;
+  const llmHeaders = useMemo(() => {
+    if (!llmKey) {
+      return null;
     }
 
-    setQuestions(payload.questions);
-    setStage('clarifying');
-    setAnswerString('');
-    setApprovedPrd(null);
-    setTasksDraft('');
-    setActiveTab('prd');
-    setLoading(false);
+    return {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${llmKey}`,
+      'x-llm-provider': llmProvider,
+    };
+  }, [llmKey, llmProvider]);
+
+  const withByokGuard = async <T,>(runner: () => Promise<T>) => {
+    if (!llmHeaders) {
+      setError('Add and validate a BYOK key before using LLM generation routes.');
+      setShowByokModal(true);
+      return null;
+    }
+
+    return runner();
+  };
+
+  const askClarifyingQuestions = async () => {
+    await withByokGuard(async () => {
+      const headers = llmHeaders as Record<string, string>;
+      setLoading(true);
+      setError(null);
+      setReview(null);
+      setCommitResult(null);
+
+      const response = await fetch('/api/llm/clarify', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ prompt: featurePrompt }),
+      });
+
+      const payload = (await response.json()) as { questions?: ClarifyingQuestion[]; error?: string };
+
+      if (!response.ok || !payload.questions) {
+        setError(payload.error ?? 'Failed to generate clarifying questions');
+        setLoading(false);
+        return;
+      }
+
+      setQuestions(payload.questions);
+      setStage('clarifying');
+      setAnswerString('');
+      setApprovedPrd(null);
+      setTasksDraft('');
+      setActiveTab('prd');
+      setLoading(false);
+    });
   };
 
   const generatePrd = async () => {
-    setLoading(true);
-    setError(null);
-    setReview(null);
-    setCommitResult(null);
+    await withByokGuard(async () => {
+      const headers = llmHeaders as Record<string, string>;
+      setLoading(true);
+      setError(null);
+      setReview(null);
+      setCommitResult(null);
 
-    const response = await fetch('/api/llm/prd', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: featurePrompt, questions, answers: answerString }),
-    });
+      const response = await fetch('/api/llm/prd', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ prompt: featurePrompt, questions, answers: answerString }),
+      });
 
-    const payload = (await response.json()) as { markdown?: string; error?: string };
+      const payload = (await response.json()) as { markdown?: string; error?: string };
 
-    if (!response.ok || !payload.markdown) {
-      setError(payload.error ?? 'Failed to generate PRD');
+      if (!response.ok || !payload.markdown) {
+        setError(payload.error ?? 'Failed to generate PRD');
+        setLoading(false);
+        return;
+      }
+
+      setPrdDraft(payload.markdown);
+      setStage('drafted');
+      setApprovedPrd(null);
+      setTasksDraft('');
+      setActiveTab('prd');
       setLoading(false);
-      return;
-    }
-
-    setPrdDraft(payload.markdown);
-    setStage('drafted');
-    setApprovedPrd(null);
-    setTasksDraft('');
-    setActiveTab('prd');
-    setLoading(false);
+    });
   };
 
   const approvePrd = async () => {
@@ -154,32 +200,35 @@ export function WorkflowShell() {
       return;
     }
 
-    setLoading(true);
-    setError(null);
-    setReview(null);
-    setCommitResult(null);
+    await withByokGuard(async () => {
+      const headers = llmHeaders as Record<string, string>;
+      setLoading(true);
+      setError(null);
+      setReview(null);
+      setCommitResult(null);
 
-    const response = await fetch('/api/llm/tasks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ approvedPrd, prompt: featurePrompt }),
-    });
+      const response = await fetch('/api/llm/tasks', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ approvedPrd, prompt: featurePrompt }),
+      });
 
-    const payload = (await response.json()) as {
-      markdown?: string;
-      error?: string;
-    };
+      const payload = (await response.json()) as {
+        markdown?: string;
+        error?: string;
+      };
 
-    if (!response.ok || !payload.markdown) {
-      setError(payload.error ?? 'Failed to generate tasks');
+      if (!response.ok || !payload.markdown) {
+        setError(payload.error ?? 'Failed to generate tasks');
+        setLoading(false);
+        return;
+      }
+
+      setTasksDraft(payload.markdown);
+      setEditingTasks(false);
+      setActiveTab('tasks');
       setLoading(false);
-      return;
-    }
-
-    setTasksDraft(payload.markdown);
-    setEditingTasks(false);
-    setActiveTab('tasks');
-    setLoading(false);
+    });
   };
 
   const regenerateTasks = async () => {
@@ -263,6 +312,15 @@ export function WorkflowShell() {
 
   return (
     <>
+      <section className="panel">
+        <div className="row-between">
+          <h2>LLM key</h2>
+          <button className="button button-secondary" type="button" onClick={() => setShowByokModal(true)}>
+            BYOK settings
+          </button>
+        </div>
+        <p className="panel-muted">{byokStatus}</p>
+      </section>
       <PreviewTabs
         activeTab={activeTab}
         approvedPrd={approvedPrd}
@@ -304,6 +362,65 @@ export function WorkflowShell() {
         prdDraft={prdDraft}
         review={review}
         tasksDraft={tasksDraft}
+      />
+      <BYOKKeyModal
+        activeProvider={llmProvider}
+        hasRememberedKey={hasRememberedKey}
+        loading={loading}
+        onClose={() => setShowByokModal(false)}
+        onForgetRememberedKey={() => {
+          forgetRememberedKey();
+          setHasRememberedKey(false);
+          setByokStatus('Removed remembered key from local storage.');
+        }}
+        onUnlockRememberedKey={async (passphrase) => {
+          try {
+            const unlocked = await unlockRememberedKey(passphrase);
+            saveSessionKey(unlocked);
+            setLlmProvider(unlocked.provider);
+            setLlmKey(unlocked.apiKey);
+            setByokStatus('Unlocked remembered key and restored session key.');
+          } catch {
+            setByokStatus('Failed to unlock remembered key. Check passphrase and try again.');
+          }
+        }}
+        onValidateAndSave={async ({ provider, apiKey, rememberKey: shouldRemember, passphrase }) => {
+          setLoading(true);
+          setError(null);
+
+          const response = await fetch('/api/llm/validate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({ provider }),
+          });
+
+          const payload = (await response.json()) as { valid?: boolean; error?: string };
+
+          if (!response.ok || !payload.valid) {
+            setByokStatus(payload.error ?? 'LLM key validation failed.');
+            setLoading(false);
+            return;
+          }
+
+          saveSessionKey({ provider, apiKey });
+          setLlmProvider(provider);
+          setLlmKey(apiKey);
+
+          if (shouldRemember) {
+            await rememberKey({ provider, apiKey, passphrase });
+            setHasRememberedKey(true);
+            setByokStatus('Key validated and encrypted into local storage.');
+          } else {
+            setByokStatus('Key validated and stored in session storage.');
+          }
+
+          setLoading(false);
+        }}
+        open={showByokModal}
+        status={byokStatus}
       />
     </>
   );
