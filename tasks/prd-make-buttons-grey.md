@@ -2,60 +2,59 @@
 
 ## 1. Introduction / Overview
 
-Currently, buttons across the application use various background colors that may not align with the desired visual design. This feature updates all buttons application-wide to use a light grey background (#D1D5DB), while preserving existing text colors and maintaining consistency in hover/active states.
+This feature changes the background color of all buttons across the entire application to light grey (`#D1D5DB`, equivalent to Tailwind CSS `gray-300`). The change applies only to the default/resting state. Text and icon colors on buttons must be set to whatever value passes WCAG AA contrast requirements against the new light grey background.
 
 ## 2. Goals
 
-- All buttons in the application have a light grey (#D1D5DB) background color after this change.
-- No button's text color is altered.
-- Hover and active states follow the same relative behavior as before (e.g., if hover previously darkened the button, it should still darken — now from the grey base).
-- The change is implemented via CSS Modules / plain CSS with no changes to HTML structure or JavaScript logic.
+- Every button in the application displays a background color of `#D1D5DB` in its default state.
+- Every button's text/icon color meets WCAG AA contrast ratio (minimum 4.5:1 for normal text, 3:1 for large text) against `#D1D5DB`.
+- No regressions in button functionality or layout.
 
 ## 3. User Stories
 
-- **As a user**, I want buttons to appear light grey so that the UI has a consistent, neutral visual style.
-- **As a developer**, I want the grey styling applied in a single, maintainable place so future color changes are easy.
+- **As a user**, I want all buttons to appear in a consistent light grey so the UI feels cohesive and neutral.
+- **As a developer**, I want button background color defined in one place so future changes are easy to make.
 
 ## 4. Functional Requirements
 
-1. The system must set the background color of all `<button>` elements (and any element styled as a button) to `#D1D5DB` (light grey).
-2. The system must NOT change the text color of any button.
-3. The system must NOT change the font, padding, border-radius, border, or any other non-background property of buttons unless required to achieve the grey background.
-4. The system must preserve existing hover and active state behavior, shifting those states relative to the new grey base color (e.g., a hover that previously darkened the button must now darken from grey rather than from the old color).
-5. The system must apply this change to all buttons across all pages and components in the application.
-6. The system must implement the change using CSS Modules or plain CSS only — no changes to HTML or JavaScript files.
+1. The system must apply a background color of `#D1D5DB` (light grey / Tailwind `gray-300`) to every button element in the application in its default/resting state.
+2. The system must apply this to **all** button variants and instances across all pages and components (primary, secondary, icon-only, and any element styled to look like a button).
+3. The system must NOT change the button background for hover, active, focus, or disabled states — only the default state is in scope.
+4. The system must ensure that the text and/or icon color on each button passes WCAG AA contrast standards against `#D1D5DB`. A dark color such as `#111827` (Tailwind `gray-900`) typically meets this requirement and should be used as the default where no accessible color already exists.
+5. The system must NOT alter any other button property: size, padding, border, border-radius, font size, font weight, or layout.
 
 ## 5. Non-Goals (Out of Scope)
 
-- Changing button text color, font, size, padding, or border styles.
-- Updating primary / CTA buttons to a different color (all buttons are treated equally here).
-- Adding new button variants or design tokens.
-- Modifying any JavaScript, TypeScript, or HTML files.
-- Changing icon colors inside buttons.
-- Updating any design system documentation or Storybook stories.
+- Changing button styles for hover, active, focus, or disabled states.
+- Changing buttons inside third-party embedded widgets (payment forms, maps, chat widgets, etc.).
+- Updating buttons in emails or other non-application surfaces.
+- Any redesign of button shape, size, spacing, or typography.
+- Dark mode variations.
+- Updating design system documentation or Storybook stories.
 
 ## 6. Design Considerations
 
-- **Target color:** `#D1D5DB` (equivalent to Tailwind `gray-300`) for the default background.
-- **Hover/active:** Derive hover from the grey base. A reasonable default is to darken slightly on hover (e.g., `#9CA3AF` / `gray-400`) if no explicit hover color currently exists, or keep the existing relative shift if one does.
-- **Disabled state:** If a disabled style exists, do not override it unless it currently relies on the old button color.
+- **Target background color:** `#D1D5DB` (Tailwind `gray-300`).
+- **Text/icon color:** Must pass WCAG AA. `#111827` (Tailwind `gray-900`) achieves a contrast ratio above 10:1 against `#D1D5DB` and is a safe default. Verify each color using a tool like the [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/).
+- If the codebase uses a design token system (CSS custom properties, Tailwind theme config, styled-system theme), update the token rather than hardcoding `#D1D5DB` at every call site.
 
 ## 7. Technical Considerations
 
-- Locate all CSS files (`.css`, `.module.css`) that define button background colors.
-- A global CSS rule (e.g., in a `global.css` or `reset.css`) targeting `button` may be the most efficient single point of change, but be careful not to override component-level specificity unintentionally.
-- Check for existing `background`, `background-color`, or shorthand rules on `.btn`, `button`, and any other button class names in use.
-- Ensure the change works across all browsers that the application supports.
+- Locate all button style definitions: global CSS, CSS Modules, Tailwind utility classes, styled-components, CSS-in-JS, or theme files.
+- If a shared `Button` component exists, updating its default styles may be sufficient to cover most buttons in a single change.
+- If Tailwind is used, replace existing background-color utilities (e.g., `bg-blue-500`, `bg-primary`) on button elements/components with `bg-gray-300`, or update the base button config in `tailwind.config`.
+- After changes, manually inspect (or run a visual regression test on) all button instances to confirm no button was missed.
+- Ensure changes work across all browsers the application supports.
 
 ## 8. Success Metrics
 
-- 100% of buttons visible in the application display a `#D1D5DB` background in their default state.
-- No button's text color has changed from its previous value.
-- Hover and active states remain functional and visually distinct from the default state.
-- No visual regressions are introduced in non-button elements.
+- 100% of buttons in the application show `#D1D5DB` as their background color in the default state.
+- 100% of buttons pass WCAG AA contrast ratio for text/icon color against `#D1D5DB`.
+- Zero functional regressions reported after deployment (clicks, form submissions, navigation all work as before).
+- No non-button elements are unintentionally affected.
 
 ## 9. Open Questions
 
-- Are there any buttons that must remain a specific non-grey color for accessibility or brand reasons (e.g., a "danger" delete button in red)?
-- Is there a global stylesheet already in place where a single rule would apply everywhere, or are button styles spread across many component-level CSS Modules?
-- Should the disabled button state also be updated to a grey variant, or left as-is?
+- Are there any buttons intentionally styled as transparent or invisible (e.g., icon-only toolbar buttons with no background)? Should those also become grey?
+- Is there a centralized design token or theme file for button colors, or are styles scattered across individual component files?
+- Should `<a>` tags or other non-`<button>` elements styled to look like buttons also be updated?
