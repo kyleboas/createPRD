@@ -24,6 +24,8 @@ export type SessionData = {
   githubLogin: string;
   githubId: number;
   selectedRepo?: SelectedRepo;
+  approvedPrdSnapshot?: string;
+  prdApprovedAt?: string;
 };
 
 function getSessionSecret() {

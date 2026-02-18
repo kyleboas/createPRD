@@ -14,6 +14,8 @@ export async function GET() {
     githubLogin: session.githubLogin,
     githubId: session.githubId,
     selectedRepo: session.selectedRepo ?? null,
+    approvedPrdSnapshot: session.approvedPrdSnapshot ?? null,
+    prdApprovedAt: session.prdApprovedAt ?? null,
   });
 }
 
