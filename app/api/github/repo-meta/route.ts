@@ -1,14 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { githubRequest } from '@/lib/github/client';
+import { getRepoMetadata } from '@/lib/github/repos';
 import { getSession } from '@/lib/session';
-
-type RepoResponse = {
-  id: number;
-  full_name: string;
-  default_branch: string;
-  private: boolean;
-};
 
 export async function GET(request: NextRequest) {
   const session = getSession();
@@ -24,12 +17,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'owner and repo are required' }, { status: 400 });
   }
 
-  const repoData = await githubRequest<RepoResponse>(`/repos/${owner}/${repo}`, session.accessToken);
+  const repoData = await getRepoMetadata({ owner, repo, accessToken: session.accessToken });
 
-  return NextResponse.json({
-    id: repoData.id,
-    fullName: repoData.full_name,
-    defaultBranch: repoData.default_branch,
-    private: repoData.private,
-  });
+  return NextResponse.json(repoData);
 }

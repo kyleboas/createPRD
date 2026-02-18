@@ -89,19 +89,19 @@ Update the file after completing each sub-task, not just after completing an ent
     - `/tasks/prd-[feature-name].md`
     - `/tasks/tasks-[feature-name].md`
 
-- [ ] 5.0 Commit PRD + tasks into the selected repo’s default branch with collision handling
-  - [ ] 5.1 Implement `feature-name` slugging rules and unit tests (lowercase, hyphenated, safe chars)
-  - [ ] 5.2 Implement GitHub “get default branch” logic (do not assume `main`)
-  - [ ] 5.3 Implement “check if file exists” logic for both target paths before committing
-  - [ ] 5.4 Implement collision policy:
+- [x] 5.0 Commit PRD + tasks into the selected repo’s default branch with collision handling
+  - [x] 5.1 Implement `feature-name` slugging rules and unit tests (lowercase, hyphenated, safe chars)
+  - [x] 5.2 Implement GitHub “get default branch” logic (do not assume `main`)
+  - [x] 5.3 Implement “check if file exists” logic for both target paths before committing
+  - [x] 5.4 Implement collision policy:
     - either prompt user to overwrite, or
     - auto-version filenames (e.g., `-v2`, `-v3`) and display chosen filenames before commit
-  - [ ] 5.5 Implement commit API route to write both files to the default branch
-  - [ ] 5.6 Ensure atomic-ish behavior:
+  - [x] 5.5 Implement commit API route to write both files to the default branch
+  - [x] 5.6 Ensure atomic-ish behavior:
     - if you can’t guarantee a single commit containing both files, then handle partial failure clearly (show exactly what succeeded)
-  - [ ] 5.7 Add a final “Review summary” confirmation UI before commit (repo, branch, filenames, overwrite/versioning)
-  - [ ] 5.8 On success, display repo + branch + commit SHA + file paths
-  - [ ] 5.9 Handle branch protection failures:
+  - [x] 5.7 Add a final “Review summary” confirmation UI before commit (repo, branch, filenames, overwrite/versioning)
+  - [x] 5.8 On success, display repo + branch + commit SHA + file paths
+  - [x] 5.9 Handle branch protection failures:
     - show a clear error message (“Direct commits to default branch are blocked by branch protection”)
     - include actionable guidance (e.g., “disable protection or allow this app to bypass” if applicable)
 
