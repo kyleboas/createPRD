@@ -46,12 +46,12 @@ Update the file after completing each sub-task, not just after completing an ent
 
 ## Tasks
 
-- [ ] 1.0 Scaffold the web app project and baseline tooling
-  - [ ] 1.1 Choose the app framework and structure (e.g., Next.js App Router) and initialize the project
-  - [ ] 1.2 Add linting/formatting (ESLint/Prettier) and ensure scripts exist in `package.json`
-  - [ ] 1.3 Add a testing framework (Jest + TS support) and a basic smoke test
-  - [ ] 1.4 Add environment variable management (e.g., `.env.local`) and document required env vars in `README.md`
-  - [ ] 1.5 Create a minimal homepage shell with placeholder panels: repo picker, chat, preview tabs, action bar
+- [x] 1.0 Scaffold the web app project and baseline tooling
+  - [x] 1.1 Choose the app framework and structure (e.g., Next.js App Router) and initialize the project
+  - [x] 1.2 Add linting/formatting (ESLint/Prettier) and ensure scripts exist in `package.json`
+  - [x] 1.3 Add a testing framework (Jest + TS support) and a basic smoke test
+  - [x] 1.4 Add environment variable management (e.g., `.env.local`) and document required env vars in `README.md`
+  - [x] 1.5 Create a minimal homepage shell with placeholder panels: repo picker, chat, preview tabs, action bar
 
 - [ ] 2.0 Implement GitHub authentication and repository selection
   - [ ] 2.1 Decide auth approach (OAuth app vs GitHub App) and document the choice + required permissions/scopes
