@@ -4,46 +4,9 @@ description: Run a 2-step workflow: (1) PRD with 3–5 clarifying questions, sav
 disable-model-invocation: true
 ---
 
-# Orchestration Contract (do not skip)
-
-When the user invokes `/prd <feature-name> <initial-prompt>`:
-
-## Canonical output paths for this orchestrator
-- PRD file: `/tasks/<feature-name>-prd.md`
-- Tasks file: `/tasks/<feature-name>-tasks.md`
-
-## Execution order (must be followed exactly)
-### Step 1 — PRD
-1) Read the “Step 1: Generate PRD…” instructions below.
-2) Ask ONLY the clarifying questions required by Step 1 (3–5 questions, numbered, each with A/B/C/D options).
-3) STOP and wait for the user’s selections (e.g., “1A, 2C, 3B”).
-4) After the user answers, generate the PRD per Step 1 and SAVE it to:
-   `/tasks/<feature-name>-prd.md`
-
-### Step 2 — Tasks
-5) Using the PRD you just wrote as the requirements source, begin the task-list process below.
-6) Phase 1: Generate ONLY the parent tasks (including 0.0 Create feature branch) and write/update:
-   `/tasks/<feature-name>-tasks.md`
-   - The file may be a “Phase 1 draft” containing just the parent tasks section in the required checklist format.
-7) In chat, display the parent tasks and say exactly:
-   "I have generated the high-level tasks based on your requirements. Ready to generate the sub-tasks? Respond with 'Go' to proceed."
-8) STOP and wait for the user to respond with “Go”.
-9) When the user says “Go”, Phase 2: generate sub-tasks + relevant files + notes, and UPDATE:
-   `/tasks/<feature-name>-tasks.md`
-   so it matches the required final Markdown structure.
-
-## Safety / scope
-- Do NOT implement anything.
-- Only create or update the two output files above (and create `/tasks` if missing).
-- If `<feature-name>` is missing, infer a short kebab-case slug from the initial prompt.
-
----
-
 Step 1: Generate PRD in /tasks/<feature-name>-prd.md 
 
 ---
-
-# Rule: 
 
 # Rule: Generating a Product Requirements Document (PRD)
 
