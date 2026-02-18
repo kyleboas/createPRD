@@ -62,19 +62,19 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 2.6 Add API route to fetch repo metadata (default branch name at minimum)
   - [x] 2.7 Persist “last selected repo” per user session (and optionally per user account, if you add a DB later)
 
-- [ ] 3.0 Build the chat flow for clarifying questions + PRD generation + approval
-  - [ ] 3.1 Implement a conversation state model (initial prompt → clarifying questions → answers → PRD draft → approved)
-  - [ ] 3.2 Create `clarify` API route to generate 3–5 numbered questions with A/B/C/D options
-  - [ ] 3.3 Ensure the clarifying questions format is strict:
+- [x] 3.0 Build the chat flow for clarifying questions + PRD generation + approval
+  - [x] 3.1 Implement a conversation state model (initial prompt → clarifying questions → answers → PRD draft → approved)
+  - [x] 3.2 Create `clarify` API route to generate 3–5 numbered questions with A/B/C/D options
+  - [x] 3.3 Ensure the clarifying questions format is strict:
     - numbered questions `1..N`
     - options labeled `A..D` (or more)
     - user answer format accepted like `1B, 2C, 3A`
-  - [ ] 3.4 Build chat UI to display questions and support quick answering (copy/paste answer string or button picks)
-  - [ ] 3.5 Create `prd` API route to generate PRD markdown using the required PRD structure
-  - [ ] 3.6 Render PRD markdown in a preview panel (with safe markdown rendering)
-  - [ ] 3.7 Add “Regenerate PRD” and “Edit PRD” UX (edit can be a simple markdown textarea in v1)
-  - [ ] 3.8 Implement the approval gate: PRD must be explicitly approved before any GitHub write endpoints can run
-  - [ ] 3.9 Store the approved PRD snapshot (in session state at minimum)
+  - [x] 3.4 Build chat UI to display questions and support quick answering (copy/paste answer string or button picks)
+  - [x] 3.5 Create `prd` API route to generate PRD markdown using the required PRD structure
+  - [x] 3.6 Render PRD markdown in a preview panel (with safe markdown rendering)
+  - [x] 3.7 Add “Regenerate PRD” and “Edit PRD” UX (edit can be a simple markdown textarea in v1)
+  - [x] 3.8 Implement the approval gate: PRD must be explicitly approved before any GitHub write endpoints can run
+  - [x] 3.9 Store the approved PRD snapshot (in session state at minimum)
 
 - [ ] 4.0 Generate the tasks document (full breakdown) and preview it with checkboxes
   - [ ] 4.1 Create `tasks` API route that takes the approved PRD and outputs `tasks-[feature-name].md` content
