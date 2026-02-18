@@ -72,11 +72,15 @@ This solves the problem of: (1) turning an idea into a clear PRD and implementat
    - and the paths of files written.
 
 7. **BYOK (Bring Your Own Key) for LLM**
-   7.1 The system must allow the user to provide their own LLM API key.  
-   7.2 The system must not log the raw API key in server logs or analytics.  
-   7.3 The system must validate the key (e.g., via a lightweight test request) and show a clear error if invalid.  
-   7.4 The system must support at least one LLM provider in v1 (codex) and be designed so additional providers can be added later.  
-   7.5 The system must define where the key lives (session-only, client-only, or encrypted server storage) and implement that choice consistently.
+   7.1 The system must allow the user to provide their own LLM API key.
+   7.2 The system must not log the raw API key in server logs or analytics.
+   7.3 The system must validate the key (e.g., via a lightweight test request) and show a clear error if invalid.
+   7.4 The system must support at least one LLM provider in v1 (codex) and be designed so additional providers can be added later.
+   7.5 **Key storage strategy (v1 decision):**
+   - **Default (required):** Store the key in **session memory only** (React state or `sessionStorage`). The key is never written to `localStorage` unless the user opts in. The key is cleared when the tab is closed.
+   - **Optional "Remember my key" (opt-in):** Allow the user to persist the key in `localStorage` encrypted with AES-256 via the browser's [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API), using a key derived from a user-supplied passphrase (PBKDF2). The UI must display a visible warning: *"Your key is encrypted and stored locally. It is not protected against XSS attacks."*
+   - The system must never transmit the raw key to the server except as an `Authorization` header in LLM API calls proxied server-side.
+   - If stored in `localStorage`, the system must provide a "Forget my key" action that clears the stored value immediately.
 
 8. **Error Handling and Safety**
    8.1 The system must show clear, actionable errors for common GitHub failures (missing permissions, repo not found, rate limits, API errors).  
@@ -128,7 +132,7 @@ This solves the problem of: (1) turning an idea into a clear PRD and implementat
 ## 9. Open Questions
 
 - Which GitHub authorization model will be used in v1 (GitHub App vs OAuth), and what exact permissions/scopes are required?
-- Where will BYOK keys be stored (session-only, client-only, encrypted server-side), and what is the minimum acceptable security posture for v1?
+- ~~Where will BYOK keys be stored (session-only, client-only, encrypted server-side), and what is the minimum acceptable security posture for v1?~~ **Resolved:** Default is session memory (`sessionStorage`); opt-in `localStorage` persistence uses AES-256 + PBKDF2 via Web Crypto API with a user passphrase and a visible XSS warning.
 - Should tasks generation be automatic immediately after PRD approval, or require a separate explicit “Generate tasks” click?
 - What is the chosen collision policy: always version filenames, or prompt the user to overwrite?
 - Should the repo picker show *all* accessible repos, or only repos where the user appears to have write access (to reduce failed commits)?
