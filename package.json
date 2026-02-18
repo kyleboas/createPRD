@@ -6,11 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "node scripts/run-next-lint.js",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "jest",
-    "test:watch": "jest --watch"
+    "test": "node scripts/run-jest.js",
+    "test:watch": "node scripts/run-jest.js --watch"
   },
   "dependencies": {
     "next": "14.2.5",

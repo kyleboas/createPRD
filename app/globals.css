@@ -60,3 +60,65 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+.stack-sm {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.row-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.button {
+  display: inline-block;
+  border-radius: 0.5rem;
+  border: 1px solid #0f172a;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 0.5rem 0.75rem;
+  text-decoration: none;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.button-secondary {
+  border-color: #334155;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+input,
+select {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+}
+
+.selected-repo {
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  background: #f8fafc;
+}
+
+.selected-repo h3,
+.selected-repo p {
+  margin: 0;
+}
+
+.selected-repo p + p {
+  margin-top: 0.35rem;
+}
+
+.warning-text {
+  color: #b45309;
+}
+
+.error-text {
+  color: #b91c1c;
+}

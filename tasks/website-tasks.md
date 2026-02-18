@@ -53,14 +53,14 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 1.4 Add environment variable management (e.g., `.env.local`) and document required env vars in `README.md`
   - [x] 1.5 Create a minimal homepage shell with placeholder panels: repo picker, chat, preview tabs, action bar
 
-- [ ] 2.0 Implement GitHub authentication and repository selection
-  - [ ] 2.1 Decide auth approach (OAuth app vs GitHub App) and document the choice + required permissions/scopes
-  - [ ] 2.2 Implement GitHub login flow and session handling (store access token securely server-side)
-  - [ ] 2.3 Create an API route to list accessible repositories for the signed-in user
-  - [ ] 2.4 In the repo list response, include enough info to warn about likely write failures (e.g., user permission level if available)
-  - [ ] 2.5 Build `RepoPicker` UI with search/filter, selection state, and “selected repo” display
-  - [ ] 2.6 Add API route to fetch repo metadata (default branch name at minimum)
-  - [ ] 2.7 Persist “last selected repo” per user session (and optionally per user account, if you add a DB later)
+- [x] 2.0 Implement GitHub authentication and repository selection
+  - [x] 2.1 Decide auth approach (OAuth app vs GitHub App) and document the choice + required permissions/scopes
+  - [x] 2.2 Implement GitHub login flow and session handling (store access token securely server-side)
+  - [x] 2.3 Create an API route to list accessible repositories for the signed-in user
+  - [x] 2.4 In the repo list response, include enough info to warn about likely write failures (e.g., user permission level if available)
+  - [x] 2.5 Build `RepoPicker` UI with search/filter, selection state, and “selected repo” display
+  - [x] 2.6 Add API route to fetch repo metadata (default branch name at minimum)
+  - [x] 2.7 Persist “last selected repo” per user session (and optionally per user account, if you add a DB later)
 
 - [ ] 3.0 Build the chat flow for clarifying questions + PRD generation + approval
   - [ ] 3.1 Implement a conversation state model (initial prompt → clarifying questions → answers → PRD draft → approved)
