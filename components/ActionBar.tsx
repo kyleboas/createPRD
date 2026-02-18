@@ -1,5 +1,7 @@
 'use client';
 
+type WorkflowStage = 'initial' | 'clarifying' | 'drafted' | 'approved';
+
 type CommitReview = {
   repository: string;
   branch: string;
@@ -19,6 +21,7 @@ type CommitResult = {
 };
 
 type ActionBarProps = {
+  stage: WorkflowStage;
   canGeneratePrd: boolean;
   loading: boolean;
   isApproved: boolean;
@@ -36,14 +39,47 @@ type ActionBarProps = {
   onCommitToRepo: () => Promise<void>;
 };
 
+const WORKFLOW_STEPS = ['Prompt', 'Clarify', 'PRD', 'Approve', 'Tasks', 'Commit'] as const;
+
+function currentStepIndex(stage: WorkflowStage): number {
+  if (stage === 'clarifying') {
+    return 1;
+  }
+
+  if (stage === 'drafted') {
+    return 2;
+  }
+
+  if (stage === 'approved') {
+    return 4;
+  }
+
+  return 0;
+}
+
 export function ActionBar(props: ActionBarProps) {
   const canReview = props.isApproved && props.tasksDraft.trim().length > 0;
+  const activeStep = currentStepIndex(props.stage);
 
   return (
     <section className="panel">
       <h2>Action bar</h2>
       <div className="stack-sm">
         <p className="panel-muted">PRD approval is required before any GitHub write operation can run.</p>
+
+        <div className="step-indicator" aria-label="Workflow progress">
+          {WORKFLOW_STEPS.map((step, index) => (
+            <span
+              key={step}
+              className={index <= activeStep ? 'step-pill step-pill-active' : 'step-pill'}
+            >
+              {step}
+            </span>
+          ))}
+        </div>
+
+        {props.loading ? <p className="panel-muted">⏳ Working on your request…</p> : null}
+
         <div className="quick-options">
           <button
             className="button"

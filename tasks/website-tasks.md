@@ -121,20 +121,20 @@ Update the file after completing each sub-task, not just after completing an ent
     - cap maximum prompt/response sizes
   - [x] 6.7 Add basic telemetry counters (non-sensitive) for debugging (e.g., “LLM call failed”, “GitHub write failed”)
 
-- [ ] 7.0 Add tests, error handling, UX polish, and deployment readiness
-  - [ ] 7.1 Add unit tests for slugging and filename collision/versioning logic
-  - [ ] 7.2 Add tests for GitHub client error normalization (401, 403, 404, rate limit)
-  - [ ] 7.3 Add tests for “format validators”:
+- [x] 7.0 Add tests, error handling, UX polish, and deployment readiness
+  - [x] 7.1 Add unit tests for slugging and filename collision/versioning logic
+  - [x] 7.2 Add tests for GitHub client error normalization (401, 403, 404, rate limit)
+  - [x] 7.3 Add tests for “format validators”:
     - clarifying questions structure
     - tasks markdown checkbox structure
-  - [ ] 7.4 Add end-to-end happy path checklist (manual QA doc in `README.md`)
-  - [ ] 7.5 Improve UX states:
+  - [x] 7.4 Add end-to-end happy path checklist (manual QA doc in `README.md`)
+  - [x] 7.5 Improve UX states:
     - loading spinners
     - disabled buttons when prerequisites missing
     - clear step indicator (prompt → clarify → PRD → approve → tasks → commit)
-  - [ ] 7.6 Add security review checklist:
+  - [x] 7.6 Add security review checklist:
     - secrets only in env vars
     - no token leakage to client
     - CSRF/basic request hardening as appropriate
-  - [ ] 7.7 Prepare deployment config (Vercel/Railway/etc.) and document env vars + setup steps
-  - [ ] 7.8 Final pass: ensure `/tasks/` outputs exactly match required filenames and formatting constraints
+  - [x] 7.7 Prepare deployment config (Vercel/Railway/etc.) and document env vars + setup steps
+  - [x] 7.8 Final pass: ensure `/tasks/` outputs exactly match required filenames and formatting constraints

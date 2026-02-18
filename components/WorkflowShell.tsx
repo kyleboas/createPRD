@@ -347,6 +347,7 @@ export function WorkflowShell() {
         stage={stage}
       />
       <ActionBar
+        stage={stage}
         canGeneratePrd={canGeneratePrd}
         commitResult={commitResult}
         error={error}

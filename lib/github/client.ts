@@ -7,6 +7,32 @@ export class GitHubApiError extends Error {
   }
 }
 
+function normalizeGitHubErrorMessage(status: number, message?: string): string {
+  const fallback = message?.trim() || 'GitHub request failed';
+
+  if (status === 401) {
+    return 'GitHub authentication failed (401). Reconnect GitHub and try again.';
+  }
+
+  if (status === 403) {
+    if (/rate limit/i.test(fallback)) {
+      return 'GitHub API rate limit reached (403). Wait a moment and retry.';
+    }
+
+    return `GitHub access denied (403). ${fallback}`;
+  }
+
+  if (status === 404) {
+    return `GitHub resource not found (404). ${fallback}`;
+  }
+
+  if (status === 429) {
+    return 'GitHub API rate limit reached (429). Wait a moment and retry.';
+  }
+
+  return fallback;
+}
+
 type GitHubRequestOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
@@ -32,7 +58,7 @@ export async function githubRequest<T>(
 
   if (!response.ok) {
     const payload = (await response.json().catch(() => null)) as { message?: string } | null;
-    throw new GitHubApiError(payload?.message ?? 'GitHub request failed', response.status);
+    throw new GitHubApiError(normalizeGitHubErrorMessage(response.status, payload?.message), response.status);
   }
 
   if (response.status === 204) {

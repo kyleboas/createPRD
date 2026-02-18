@@ -59,7 +59,7 @@ export function ChatPanel(props: ChatPanelProps) {
           onClick={() => props.onAskClarifyingQuestions()}
           type="button"
         >
-          Ask clarifying questions
+          {props.loading ? 'Asking…' : 'Ask clarifying questions'}
         </button>
 
         {props.stage !== 'initial' && props.questions.length > 0 ? (

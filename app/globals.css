@@ -183,3 +183,24 @@ textarea {
   background: #ffffff;
   padding: 1rem;
 }
+
+.step-indicator {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.step-pill {
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.step-pill-active {
+  border-color: #0f172a;
+  color: #0f172a;
+  background: #e2e8f0;
+  font-weight: 600;
+}
