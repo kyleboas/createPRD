@@ -1,5 +1,5 @@
 ---
-name: prd
+name: tasks
 description: Generate tasks in /tasks/<feature-name>-tasks.md
 disable-model-invocation: true
 ---
