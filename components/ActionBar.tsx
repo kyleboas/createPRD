@@ -5,10 +5,13 @@ type ActionBarProps = {
   loading: boolean;
   isApproved: boolean;
   prdDraft: string;
+  tasksDraft: string;
   error: string | null;
   onGeneratePrd: () => Promise<void>;
   onRegeneratePrd: () => Promise<void>;
   onApprovePrd: () => Promise<void>;
+  onGenerateTasks: () => Promise<void>;
+  onRegenerateTasks: () => Promise<void>;
 };
 
 export function ActionBar(props: ActionBarProps) {
@@ -41,6 +44,22 @@ export function ActionBar(props: ActionBarProps) {
             type="button"
           >
             Approve PRD
+          </button>
+          <button
+            className="button"
+            disabled={props.loading || !props.isApproved}
+            onClick={() => props.onGenerateTasks()}
+            type="button"
+          >
+            Generate Tasks
+          </button>
+          <button
+            className="button button-secondary"
+            disabled={props.loading || !props.tasksDraft.trim()}
+            onClick={() => props.onRegenerateTasks()}
+            type="button"
+          >
+            Regenerate Tasks
           </button>
         </div>
         <p>

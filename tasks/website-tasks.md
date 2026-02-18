@@ -76,16 +76,16 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 3.8 Implement the approval gate: PRD must be explicitly approved before any GitHub write endpoints can run
   - [x] 3.9 Store the approved PRD snapshot (in session state at minimum)
 
-- [ ] 4.0 Generate the tasks document (full breakdown) and preview it with checkboxes
-  - [ ] 4.1 Create `tasks` API route that takes the approved PRD and outputs `tasks-[feature-name].md` content
-  - [ ] 4.2 Enforce tasks formatting:
+- [x] 4.0 Generate the tasks document (full breakdown) and preview it with checkboxes
+  - [x] 4.1 Create `tasks` API route that takes the approved PRD and outputs `tasks-[feature-name].md` content
+  - [x] 4.2 Enforce tasks formatting:
     - every task line uses markdown checkboxes `- [ ]`
     - parent tasks use `X.0`, sub-tasks use `X.1`, `X.2`, etc.
     - include task `0.0 Create feature branch` only in the *generated* tasks file if your process requires it (your app can still generate it consistently)
-  - [ ] 4.3 Ensure the generated tasks include sub-tasks for each parent task (no “empty” parents unless purely config)
-  - [ ] 4.4 Add preview tab for Tasks and render the markdown
-  - [ ] 4.5 Add “Regenerate Tasks” and optional “Edit Tasks” UX
-  - [ ] 4.6 Compute and display the final target filenames:
+  - [x] 4.3 Ensure the generated tasks include sub-tasks for each parent task (no “empty” parents unless purely config)
+  - [x] 4.4 Add preview tab for Tasks and render the markdown
+  - [x] 4.5 Add “Regenerate Tasks” and optional “Edit Tasks” UX
+  - [x] 4.6 Compute and display the final target filenames:
     - `/tasks/prd-[feature-name].md`
     - `/tasks/tasks-[feature-name].md`
 
